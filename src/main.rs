@@ -1,21 +1,27 @@
-use dotenv;
-use rspotify::{self, prelude::BaseClient};
+use pcap;
 
-#[tokio::main]
-async fn main() {
-    dotenv::dotenv().ok();
+const PORT: u16 = 6214;
 
-    let creds = rspotify::Credentials::from_env().unwrap();
-    let spotify = rspotify::ClientCredsSpotify::new(creds);
+fn main() {
+    let device = pcap::Device::lookup().unwrap().unwrap();
+    let devices = pcap::Device::list().unwrap();
 
-    spotify.request_token().await.unwrap();
+    println!("devices: {:?}", devices);
 
-    // Running the requests
-    let birdy_uri =
-        rspotify::model::AlbumId::from_uri("spotify:album:0sNOF9WDwhWunNAHPD3Baj").unwrap();
-    let albums = spotify.album(birdy_uri).await;
+    // let mut cap = pcap::Capture::from_device(device)
+    //     .unwrap()
+    //     .immediate_mode(true)
+    //     .open()
+    //     .unwrap();
 
-    println!("Response: {albums:#?}");
+    // cap.filter(&format!("port {}", PORT), false).unwrap();
+
+    // get a packet and print its bytes
+    // println!("{:?}", cap.next_packet());
+
+    // while let Ok(packet) = cap.next_packet() {
+    //     println!("received packet! {:?}", packet);
+    // }
 }
 
 fn establish_connection() {}
