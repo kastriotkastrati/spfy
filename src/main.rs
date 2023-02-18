@@ -1,27 +1,66 @@
+use etherparse;
 use pcap;
 
-const PORT: u16 = 6214;
+const PORT: u16 = 50573;
+
+struct Command {
+    raw: String,
+    arg: String,
+}
+
+impl Command {
+    pub fn new(raw: &str, arg: &str) -> Self {
+        return Command {
+            raw: raw.to_string(),
+            arg: arg.to_string(),
+        };
+    }
+}
+
+// fn get_os_command() {
+//     let os = std::env::consts::OS;
+
+//     let lookup = match os {
+//        "macos" => Command::new(, arg)
+//     }
+// }
 
 fn main() {
     let device = pcap::Device::lookup().unwrap().unwrap();
-    let devices = pcap::Device::list().unwrap();
 
-    println!("devices: {:?}", devices);
+    let get_pid = std::process::Command::new("ps")
+        .args(["-A", "|", "grep Spotify", "|", "awk 'print ${1}'"])
+        .output()
+        .expect("failed command");
 
-    // let mut cap = pcap::Capture::from_device(device)
-    //     .unwrap()
-    //     .immediate_mode(true)
-    //     .open()
-    //     .unwrap();
+    println!("pid: {:?}", get_pid);
 
-    // cap.filter(&format!("port {}", PORT), false).unwrap();
+    let mut cap = pcap::Capture::from_device(device)
+        .unwrap()
+        .immediate_mode(true)
+        .open()
+        .unwrap();
 
-    // get a packet and print its bytes
-    // println!("{:?}", cap.next_packet());
+    cap.filter(&format!("port {}", PORT), false).unwrap();
 
-    // while let Ok(packet) = cap.next_packet() {
-    //     println!("received packet! {:?}", packet);
-    // }
+    loop {
+        println!("checking packet");
+        let packet = cap.next_packet();
+        if packet.is_err() {
+            println!("error in packet");
+            break;
+        };
+        let packet = packet.unwrap();
+        decode_data(packet);
+    }
 }
 
-fn establish_connection() {}
+fn decode_data(packet: pcap::Packet) {
+    let headers = etherparse::PacketHeaders::from_ethernet_slice(packet.data);
+    let headers = headers.unwrap();
+    println!("headers: {:?}", headers);
+
+    let payload = String::from_utf8_lossy(&packet.data[headers.payload[1] as usize..]);
+
+    println!("headers: {:?}", payload);
+}

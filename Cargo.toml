@@ -9,3 +9,4 @@ serde = { version = "1.0.152", features = ["derive"] }
 pcap = { version = "1.0.0", features = ["capture-stream", "futures", "tokio"] }
 dotenv = "0.15.0"
 serde_json = "1.0.93"
+etherparse = "0.13.0"
