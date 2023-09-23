@@ -37,10 +37,8 @@ pub async fn run_program() -> () {
     let image_url_form_command = commands::main::run_command(os);
     let image_url_cleaned: String = image_url_form_command
         .chars()
-        .filter(|c| c.is_whitespace())
+        .filter(|c| !c.is_whitespace())
         .collect();
 
-    println!("cleaned url: {:?}", image_url_cleaned);
-
-    let _ = download_image(&image_url_cleaned, setup_data);
+    let _ = download_image(&image_url_cleaned, setup_data).await;
 }
