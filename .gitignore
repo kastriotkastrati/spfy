@@ -1,2 +1,5 @@
 /target
 .env
+.spfy-data/
+!.spfy-data/.gitkeep
+.DS_Store
