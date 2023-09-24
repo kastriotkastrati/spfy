@@ -1,9 +1,8 @@
-use std;
 pub struct MacOS;
 
 pub trait SpotifyInformer {
     fn get_spotify_data(&self) -> String;
-    fn set_wallpaper(&self, path: &std::path::Path) -> ();
+    fn set_wallpaper(&self, path: &std::path::Path) -> std::process::Output;
 }
 
 impl SpotifyInformer for MacOS {
@@ -26,9 +25,10 @@ impl SpotifyInformer for MacOS {
         return data;
     }
 
-    fn set_wallpaper(&self, path: &std::path::Path) -> () {
-        let path = path.to_str().unwrap();
-        let set_desktop_picture = format!("set desktop picture to POSIX file \"{}\"", path);
+    fn set_wallpaper(&self, path: &std::path::Path) -> std::process::Output {
+        let full_path = path.canonicalize().expect("could not get abs path");
+        let str_path = full_path.to_str().unwrap();
+        let set_desktop_picture = format!("set desktop picture to POSIX file \"{}\"", str_path);
         let script = [
             "tell application \"Finder\"",
             set_desktop_picture.as_str(),
@@ -36,10 +36,12 @@ impl SpotifyInformer for MacOS {
         ];
 
         let script_construction = script.iter().flat_map(|&part| ["-e", part]);
-        let _ = std::process::Command::new("osascript")
+        let output = std::process::Command::new("osascript")
             .args(script_construction)
             .output()
             .expect("Could not run osascript.");
+
+        return output;
     }
 }
 
